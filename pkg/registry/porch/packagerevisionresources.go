@@ -205,7 +205,7 @@ func (r *packageRevisionResources) Watch(ctx context.Context, options *metainter
 	ctx, span := tracer.Start(ctx, "[START]::packageRevisionResources::Watch", trace.WithAttributes())
 	defer span.End()
 
-	filter, err := parsePackageRevisionResourcesFieldSelector(options.FieldSelector)
+	filter, err := parsePackageRevisionResourcesFieldSelector(options)
 	if err != nil {
 		return nil, err
 	}
@@ -224,7 +224,7 @@ func (r *packageRevisionResources) Watch(ctx context.Context, options *metainter
 		resultChan: make(chan watch.Event, 64),
 	}
 
-	go w.listAndWatch(ctx, r, filter, options.LabelSelector)
+	go w.listAndWatch(ctx, r, *filter, options.LabelSelector)
 
 	return w, nil
 }
@@ -292,7 +292,7 @@ func (w *packageRevisionResourcesWatcher) listAndWatchInner(ctx context.Context,
 	}
 
 	sentAdd := 0
-	if err := r.packageCommon.listPackageRevisions(ctx, filter, selector, func(ctx context.Context, p repository.PackageRevision) error {
+	if err := r.packageCommon.listPackageRevisions(ctx, filter, func(ctx context.Context, p repository.PackageRevision) error {
 		obj, err := p.GetResources(ctx)
 		if err != nil {
 			w.mutex.Lock()
