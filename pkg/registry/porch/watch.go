@@ -29,7 +29,7 @@ import (
 	"k8s.io/klog/v2"
 )
 
-// createGenericWatch creates a watch.Interface that uses the provided extractor function
+// createGenericWatch creates a watch.Interface that monitors package changes.
 func createGenericWatch(ctx context.Context, r packageReader, filter repository.ListPackageRevisionFilter, extractor objectExtractor) (watch.Interface, error) {
 	ctx, cancel := context.WithCancel(ctx)
 
@@ -107,7 +107,8 @@ type packageReader interface {
 	listPackageRevisions(ctx context.Context, filter repository.ListPackageRevisionFilter, callback func(ctx context.Context, p repository.PackageRevision) error) error
 }
 
-// objectExtractor is a function that extracts the appropriate object from a PackageRevision
+// objectExtractor transforms a repository.PackageRevision into the appropriate
+// resource (PackageRevision or PackageRevisionResources).
 type objectExtractor func(ctx context.Context, pr repository.PackageRevision) (runtime.Object, error)
 
 // listAndWatch implements watch by doing a list, then sending any observed changes.
